@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<!-- 读取指定配置文件 -->
+	<properties resource="jdbc.properties"/>
+	
+	<!-- Aliases：别名 -->
+	<typeAliases>
+		<!-- 这个需要指定类名 -->
+		<!-- <typeAlias type="shun.one.pojo.User" alias="user"/> -->
+		
+		<!-- 这个就直接填写pojo或者domian的包名就可以了，这样在mapper.xml文件的resultType中就可以简写shun.one.pojo下面的所有pojo包了 -->
+		<package name="shun.one.pojo"/>
+	</typeAliases>
+
+	<!-- 和spring整合后 environments配置将废除 -->
+	<environments default="development">
+		<environment id="development">
+			<!-- 使用jdbc事务管理 -->
+			<transactionManager type="JDBC" />
+			<!-- 数据库连接池 -->
+			<dataSource type="POOLED">
+				<property name="driver" value="${jdbc.driver}" /> <!-- 上面导入了properties文件 -->
+				<property name="url" value="jdbc:mysql://localhost:3306/18-03-09-onemabatis?characterEncoding=utf-8" />
+				<property name="username" value="root" />
+				<property name="password" value="1234" />
+			</dataSource>
+		</environment>
+	</environments>
+	<mappers>
+		<!-- <mapper resource="shun/one/sqlmap/User.xml"/> -->
+		<package name="shun.one.mapper"/>
+	</mappers>	
+</configuration>

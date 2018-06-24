@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="shun.one.mapper.OrdersMapperInt">
+	
+	<!-- 查询订单表order的所有数据 -->
+	<resultMap type="Orders" id="ordersMap">
+		<!-- <id column="id" property="id"/> -->
+		<result column="user_id" property="userId"/>
+		<!-- 由于resultMap是半自动的映射，所以其实只需要手动映射不一样的字段列就可以了
+			 column：对应的是数据库的字段名称
+			 property：对应的是pojo或者domain实体类中的属性名 -->
+		<!-- <result column="number" property="number"/> -->
+		<!-- <result column="createtime" property="createtime"/> -->
+		<result column="note" property="note"/>
+	</resultMap>
+	<!-- resultType="Orders"如果pojo属性名和数据库字段名不一致就会不能自动映射，所以采用resultMap半自动映射 -->
+	<select id="selectOrdersList" resultMap="ordersMap" >
+		select id,user_id,number,createtime,note from orders
+	</select>
+	
+	<resultMap type="Orders" id="order">
+		<id column="id" property="id"/>
+		<!-- 普通字段不对应数据库字段的手动映射 -->
+		<result column="user_id" property="userId"/>
+		<result column="number" property="number"/>
+		<result column="createtime" property="createtime"/>
+		<result column="note" property="note"/>
+		<!-- 一对一关系表达   property：订单对象里的用户对象的字段名字-->
+		<association property="user" javaType="User">
+			<id column="user_id" property="id"/>
+			<result column="username" property="username"/>
+			<result column="birthday" property="birthday"/>
+			<result column="sex" property="sex"/>
+			<result column="address" property="address"/>
+		</association>
+	</resultMap>
+	
+	<!-- 一对一关联查询，以订单为中心关联用户    多个订单对应一个用户
+		这里需要注意的是，由于需要映射到Orders里面的selectOrders的list集合
+		也就是对象里面映射到对象，所以需要写resultMap而不是以往的resultType
+		也就是说，进行一对一一对多关联的时候就需要resultMap -->
+	<select id="selectOrders" resultMap="order">
+	<!--select o.id,o.user_id,o.number,o.createtime,u.username
+		from orders o left join user u
+		on o.user_id = u.id -->
+		SELECT * FROM orders o LEFT JOIN USER u ON o.user_id = u.id 
+	</select>
+</mapper>
+
+

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+	
+	<!-- 扫描@Controller   @Service注解 -->	
+	<context:component-scan base-package="com.shun"></context:component-scan>
+	
+	<!-- 注解驱动 			conversion-service：设置转换的服务-->
+	<mvc:annotation-driven conversion-service="conversionServiceFactoryBean"/>
+	
+	<!-- 配置Conveter转换器(转换工厂）例如用来转换日期用来去除前后空格-->
+	<bean id = "conversionServiceFactoryBean" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<!-- 配置多个转化器 -->
+		<property name="converters">
+			<list>
+				<!-- 自定义转换器的类由我来写一份转换的过程 自定义类型转换器  -->
+				<bean class="com.shun.conversion.DateConveter"></bean>
+			</list>
+		</property>
+	</bean>
+
+	
+	<!-- 配置视图解释器 --> 
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+	
+	<!-- springmvc的异常处理器 -->
+	<bean class="com.shun.exception.CustomerExceptionResolever"/>	
+	 
+	<!-- 上传图片配置实现类 这个id的属性值不能变动,是固定的:multipartResolver 因为springmvc只能通过这个id来找到这个实现类 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 上传图片的大小 以B字节为单位 2097152 = 2MB -->
+		<property name="maxUploadSize" value="2097152"></property>
+	</bean>  
+	
+	<!-- SpringMvc的拦截器 -->
+	<mvc:interceptors>
+		<!-- 配置多个拦截器 -->
+		<mvc:interceptor>
+			<!-- 项目名    	/abc      /add.action
+			分别对应上面的	第一个*     第二个* **拦截所有 -->
+			<mvc:mapping path="/**"/><!-- 这个/不能省略！否则不走 -->
+			<bean class="com.shun.interceptor.Interceptor1"/>
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/><!-- 这个/不能省略！否则不走 -->
+			<bean class="com.shun.interceptor.Interceptor2"/>
+		</mvc:interceptor>
+	</mvc:interceptors>
+	
+</beans>

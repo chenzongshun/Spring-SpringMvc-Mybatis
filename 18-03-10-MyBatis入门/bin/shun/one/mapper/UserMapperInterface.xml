@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace：命名空间，用于隔离sql，还有一个很重要的作用，是给接口类绑定 -->
+<mapper namespace="shun.one.mapper.UserMapperInterface">
+	<!-- 根据id删除用户 -->
+	<update id="deleteUserById" parameterType="Integer">
+		delete from user where id = #{asdfasdfsdsdffdsdf}			
+	</update>
+	
+	<!-- 根据id修改用户 -->
+	<update id="updateUserById" parameterType="shun.one.pojo.User">
+		UPDATE USER 
+		SET username=#{username},birthday=#{birthday},sex=#{sex},address=#{address} WHERE id = #{id}	
+	</update>
+	 
+	<!-- 添加用户 -->
+	<insert id="insertUser" parameterType="shun.one.pojo.User">
+<!--	查询插入记录的当前id，由于数据库的id列为自增，所以返回的是Inetger类型
+		自增的话就会导致先插入要保存的数据，然后数据库再自增插入到记录的id列，所以这个order采用属性AFTER：之后
+		如果采用的是UUID的话，那么就是BEFOR属性值了。 -->
+		<selectKey keyProperty="id" resultType="Integer" order="AFTER">
+			select LAST_INSERT_ID()
+		</selectKey>
+		insert into user (username,birthday,address,sex) 
+		values(#{username},#{birthday},#{address},#{sex}); 
+	</insert>
+	
+	<!-- 根据用户名模糊查询用户列表 -->
+	<!-- 	如何使用#{}======表示的是占位符 ? == '五'	说白了就是这个会自动会为结果加上       单引号
+			如何使用${}======表示的是字符串拼接         中间必须为value  -->	  
+	<select id="findByUserName" parameterType="String" resultType="shun.one.pojo.User">
+		select * from user where username like "%"#{shun}"%"<!-- mabatis中的占位符为#{} -->
+		<!-- select * from user where username like '%${value}%' -->		<!-- 如果是${}那么中间的值必须为value -->
+	</select>
+	
+	
+	
+	<!-- 通过id查询一个用户 -->
+	<!-- 最终留下的也就是 delete insert resultMap select sql update有用 --> 
+	<!-- 返回结果设置resultType为类全名，前提是这个类中的字段与数据库中的字段名需要一模一样 -->
+	<select id="findUserById" parameterType="Integer" resultType="User">
+		select * from user where id = #{user_id}<!-- mabatis中的占位符为#{} -->
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	id="WebApp_ID" version="3.1">
+<!--
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5"> -->
+	
+  <display-name>SpringMVC--MyBatis</display-name>
+
+  
+  	<!-- 在web.xml中通过contextConfigLocation配置spring，contextConfigLocation参数定义了要装入的 Spring 配置文件。 -->
+  	<context-param>
+  		<param-name>contextConfigLocation</param-name>
+  		<param-value>classpath:applicationContext.xml</param-value>
+  	</context-param>
+  
+	<!-- Spring监听器 -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	
+	
+	<!-- 前端控制器 -->
+	<servlet>
+		<servlet-name>springmvc</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class><!-- 在spirng-webmvc*.jar包下 -->
+		<!-- 不写默认找 /WEB-INF/[上面servlet-name值]-servlet.xml 
+		比如现在加载的是   /WEB-INF/springmvc-servlet.xml-->
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:springmvc.xml</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>springmvc</servlet-name>
+		<!-- 
+				1./*	拦截所有    连jsp、js、png、css都不放过		不建议用
+				2.*.action *.do不变拦截*的结尾					坑定能用
+				3./  	拦截所有（不包含jsp）（包含.js.png.css）和第一个就一个jsp的区别		一定要用哇，用于面向消费者       /但要对静态资源要放行
+				 -->
+		<url-pattern>*.action</url-pattern>
+	</servlet-mapping>
+	
+	  	
+	<!-- SSM处理POST提交的乱码问题 -->
+	<filter>
+		<filter-name>encoding</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<!-- CharacterEncodingFilter是在spring-web-4.1.3.RELEASE.jar中找到的路径 -->
+		<init-param>
+			<param-name>encoding</param-name><!-- 这个名字是扒resourceCode找到的 -->
+			<param-value>utf-8</param-value>
+		</init-param>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>encoding</filter-name>
+		<url-pattern>*.action</url-pattern>
+	</filter-mapping>
+
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+	
+</web-app>

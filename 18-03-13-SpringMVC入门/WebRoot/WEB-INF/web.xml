@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	id="WebApp_ID" version="3.1">
+	<display-name>SpringMVC</display-name>
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>default.html</welcome-file>
+		<welcome-file>default.htm</welcome-file>
+		<welcome-file>default.jsp</welcome-file>
+	</welcome-file-list>
+
+	<!-- 前端控制器 -->
+	<servlet>
+		<servlet-name>springmvc</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class><!-- 在spirng-webmvc*.jar包下 -->
+		<!-- 不写默认找 /WEB-INF/[上面servlet-name值]-servlet.xml 
+		比如现在加载的是   /WEB-INF/springmvc-servlet.xml-->
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:springmvc.xml</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>springmvc</servlet-name>
+		<!-- 
+				1./*	拦截所有    连jsp、js、png、css都不放过		不建议用
+				2.*.action *.do不变拦截*的结尾					坑定能用
+				3./  	拦截所有（不包含jsp）（包含.js.png.css）和第一个就一个jsp的区别		一定要用哇，用于面向消费者       /但要对静态资源要放行
+				 -->
+		<url-pattern>*.action</url-pattern>
+	</servlet-mapping>
+</web-app>

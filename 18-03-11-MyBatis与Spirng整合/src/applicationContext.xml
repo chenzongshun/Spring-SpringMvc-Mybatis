@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+   <!-- 加载配置文件 -->
+   <context:property-placeholder location="classpath:db.properties" />
+
+	<!-- 数据库连接池 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="maxActive" value="10" />
+		<property name="maxIdle" value="5" />
+	</bean>
+
+	<!-- 配置SqlSessionFactory，mabatis的工厂 -->
+	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 配置mybatis核心配置文件 -->
+		<property name="configLocation" value="classpath:SqlMapConfig.xml" />
+		<!-- 配置数据源 -->
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- UserDao -->
+	<bean id = "userDaoImpl" class="dao.UserDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactoryBean"></property>
+	</bean>
+	
+	<!-- mapper动态代理 -->
+	<bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+<!--private SqlSession getSqlSession() throws IOException {
+		// 1 加载核心配置文件 
+		String resource = "sqlMapConfig.xml";
+		InputStream resourceAsStream = Resources.getResourceAsStream(resource);// org.apache.ibatis.io.Resources
+		// 2 创建SqlSessionFactory
+		SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
+		// 3 创建sqlSession 
+		SqlSession sqlSession = sqlSessionFactory.openSession();
+		OrdersMapperInt mapper = sqlSession.getMapper(OrdersMapperInt.class);
+		List<Orders> selectOrders = mapper.selectOrders();
+		for (Orders orders : selectOrders) {
+			System.out.println(orders);
+		}
+	} -->
+		<!-- 根据上面的入门代码可以知道，在getMapper之前需要有sqlSessionFactory来创建sqlSession -->
+		<property name="sqlSessionFactory" ref="sqlSessionFactoryBean" />
+		<!-- 有sqlSession之后的getMapper里面还需要一个接口对象，注意这里是value，不是ref引用噢！ -->
+		<property name="mapperInterface" value="mapper.UserMapper" />
+	</bean>
+	
+	<!-- mapper动态代理开发增强版   扫描     无需id  爱写不写，写了没用-->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 启动就会自动找到实例化在spring的applicationContext中找到 sqlSessionFactoryBean 工厂 -->
+		<!-- 所以只需要指定基本包的地方就可以了，自动扫描包下的包的包的包的包...自动命名如：UserMapper就会自动命名为userMapper... -->
+		<property name="basePackage" value="mapper"></property>
+	</bean>
+	
+</beans>

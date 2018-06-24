@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace：命名空间，用于隔离sql，还有一个很重要的作用，是给接口类绑定 -->
+<mapper namespace="shun.one.mapper.UserMapperInterface">
+	<!-- 根据id删除用户 -->
+	<update id="deleteUserById" parameterType="Integer">
+		delete from user where id = #{asdfasdfsdsdffdsdf}			
+	</update>
+	
+	<!-- 根据id修改用户 -->
+	<update id="updateUserById" parameterType="shun.one.pojo.User">
+		UPDATE USER 
+		SET username=#{username},birthday=#{birthday},sex=#{sex},address=#{address} WHERE id = #{id}	
+	</update>
+	 
+	<!-- 添加用户 -->
+	<insert id="insertUser" parameterType="shun.one.pojo.User">
+<!--	查询插入记录的当前id，由于数据库的id列为自增，所以返回的是Inetger类型
+		自增的话就会导致先插入要保存的数据，然后数据库再自增插入到记录的id列，所以这个order采用属性AFTER：之后
+		如果采用的是UUID的话，那么就是BEFOR属性值了。 -->
+		<selectKey keyProperty="id" resultType="Integer" order="AFTER">
+			select LAST_INSERT_ID()
+		</selectKey>
+		insert into user (username,birthday,address,sex) 
+		values(#{username},#{birthday},#{address},#{sex}); 
+	</insert>
+	
+	<!-- 根据用户名模糊查询用户列表 -->
+	<!-- 	如何使用#{}======表示的是占位符 ? == '五'	说白了就是这个会自动会为结果加上       单引号
+			如何使用${}======表示的是字符串拼接         中间必须为value  -->	  
+	<select id="findByUserName" parameterType="String" resultType="shun.one.pojo.User">
+		select * from user where username like "%"#{shun}"%"<!-- mabatis中的占位符为#{} -->
+		<!-- select * from user where username like '%${value}%' -->		<!-- 如果是${}那么中间的值必须为value -->
+	</select>
+	
+	<!-- 通过id查询一个用户 -->
+	<!-- 最终留下的也就是 delete insert resultMap select sql update有用 --> 
+	<!-- 返回结果设置resultType为类全名，前提是这个类中的字段与数据库中的字段名需要一模一样 -->
+	<select id="findUserById" parameterType="Integer" resultType="User">
+		select * from user where id = #{user_id}<!-- mabatis中的占位符为#{} -->
+	</select>
+	
+	<!-- 根据用户名模糊查询 -->
+	<select id="findUserByQueryVo" parameterType="QueryVo" resultType="User">
+		select * from user where username like "%"#{user.username}"%"<!-- 注意条件里面写的是QueryVo类中的属性user -->
+										  <!-- '%'#{user.username}'%' 这个单引号是错误的！ -->
+	</select>
+	
+	<!-- 查询用户条数 -->
+	<select id="countUser" resultType="Integer">
+		select count(1) from user;
+	</select>
+	
+	<!-- 根据性别和名字查询用户
+		where标签可以去掉第一个前ADN   -->
+	<select id="selectUserBySexAndUsername" parameterType="User" resultType="User">
+		<!-- select * from user 改用sql片段 -->
+		<include refid="selectUser"/>
+		<where>
+			<if test="sex != null and sex != ''">
+				and sex = #{sex}
+			</if>
+			<if test="username != null and username != ''">
+				and username = #{username}
+			</if>
+		</where>
+	</select>
+	
+	<sql id="selectUser">
+		select * from user
+	</sql>
+	
+	<!-- 多个id查询用户之QueryVo中的List<Integer>(1,2,3) --><!-- 如果parameter为domin\pojo，那么collection就为domin\pojo里面的属性 -->
+<!--   	<select id="selectUserByIds" parameterType="QueryVo" resultType="User">
+		<include refid="selectUser"/>
+		<where>
+			id in
+			<foreach collection="idsList" item="id" separator="," open="(" close=")">
+				#{id}
+			</foreach>
+		</where>
+	</select>   --> 
+	
+	<!-- 多个id查询用户之Array[Integer](1,2,3) --><!-- 如果parameter为基本类型或者基本包装类型，那么collection就要看参数是以何方式传进来的了，如List<Integer> array.....-->
+	<!-- <select id="selectUserByIds" parameterType="Integer" resultType="User">
+		<include refid="selectUser"/>
+		<where>
+			id in
+			<foreach collection="array" item="id" separator="," open="(" close=")">
+				#{id}
+			</foreach>
+		</where>
+	</select>  -->
+	
+	<!-- 多个id查询用户之List<Integer> -->
+	<select id="selectUserByIds" parameterType="Integer" resultType="User">
+		<include refid="selectUser"/>
+		<where>
+			id in
+			<foreach collection="list" item="id" separator="," open="(" close=")">
+				#{id}
+			</foreach>
+		</where>
+	</select> 
+	
+	<!-- 查询所有用户，并且包括对应的订单，用来测试一对多关系表达 -->
+	<select id="selectUserAndOrders" resultMap="usersAndOrders">
+		SELECT 
+		o.id AS oid,user_id,number,createtime,note,
+		u.id AS uid,username,birthday,sex,address 
+		FROM orders o RIGHT JOIN USER u ON o.user_id = u.id 
+	</select> 
+	
+	<resultMap type="User" id="usersAndOrders">
+		<id column="uid" property="id"/>
+		<result column="username" property="username"/>
+		<result column="sex" property="sex"/>
+		<result column="birthday" property="birthday"/>
+		<result column="address" property="address"/>
+		<!-- 一对多的类型采用一对一的javaType="Orders"这在一对多表达中是错误的，以及javaType="list"也是错误的。
+			必须采用ofType来表达一对多，这个多是个List，这个List里面的泛型 -->
+		<collection property="orderList" ofType="Orders">
+			<id column="oid" property="id"/>
+			<result column="user_id" property="userId"/>
+			<result column="number" property="number"/>
+			<result column="createtime" property="createtime"/>
+			<result column="note" property="note"/>
+		</collection>
+	</resultMap>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
